@@ -9,8 +9,8 @@
 | 包 | 用于 | 网页交付方式 |
 |---|---|---|
 | `claude/painless-learning-web/` | Claude（claude.ai 网页版 / 桌面端） | 发布为 artifact（带链接的托管网页），课件页截图随网页上传 |
-| `codex/painless-learning-web/` | OpenAI Codex | 写到课程文件夹的 `_学习网页/index.html`，浏览器直接打开；附 `agents/openai.yaml` 界面信息 |
-| `workbuddy/painless-learning-web/` | 腾讯 WorkBuddy | 同 Codex 包（不含 `agents/openai.yaml`） |
+| `codex/painless-learning-web/` | OpenAI Codex | 能用 Sites 插件时发布为托管网页，之后一直在同一个 site 上更新；否则写到课程文件夹的 `_学习网页/index.html`。附 `agents/openai.yaml` 界面信息 |
+| `workbuddy/painless-learning-web/` | 腾讯 WorkBuddy | 写到课程文件夹的 `_学习网页/index.html`，浏览器直接打开 |
 
 Claude Code、Gemini CLI、GitHub Copilot 等其他支持 [Agent Skills 标准](https://agentskills.io/specification)的工具，可以用 Codex 包或 WorkBuddy 包。
 
@@ -50,7 +50,8 @@ painless-learning/
 │   ├── SKILL.md
 │   └── scripts/validate_course.py
 ├── codex/painless-learning-web/
-│   ├── SKILL.md
+│   ├── SKILL.md                         ← 精简核心：必须做到的事 + 流程
+│   ├── references/                      ← 各环节细则，做到哪步读哪个
 │   ├── agents/openai.yaml
 │   └── scripts/validate_course.py
 ├── workbuddy/painless-learning-web/
@@ -62,7 +63,9 @@ painless-learning/
     └── painless-learning-web-workbuddy.zip
 ```
 
-Codex 和 WorkBuddy 包的 SKILL.md 开头多了一节“零、环境约定”。它说明了和 Claude 版的区别：网页写成本地文件；课件用相对路径链接到 PDF 的某一页；网页里不能调用 AI，Cheat Sheet 的整理改成“复制给 AI”；自我改进时直接修改 skill 文件。
+WorkBuddy 包的 SKILL.md 开头多了一节“零、环境约定”。它说明了和 Claude 版的区别：网页写成本地文件；课件用相对路径链接到 PDF 的某一页；网页里不能调用 AI，Cheat Sheet 的整理改成“复制给 AI”；自我改进时直接修改 skill 文件。
+
+Codex 包拆成了“精简 SKILL.md + references/”：SKILL.md 只写必须做到的事（学习目的只听用户说、知识点级拓扑图、确认稿最低要求和样例、怎么提问、网页交付），细则按环节放在 `references/` 里。这样做是因为单个长文件在 Codex 里容易被略读，出现过只给模块级直线路线、不提问的情况。
 
 ## 安装
 
@@ -80,6 +83,16 @@ cp -r codex/painless-learning-web ~/.agents/skills/
 # 或者只放进某个项目：<项目根目录>/.agents/skills/
 ```
 较早版本的 Codex 读取 `~/.codex/skills/`。装好后重启 Codex；可以直接描述任务，也可以用 `$painless-learning-web` 调用。
+
+建议再做两件事：
+- **让 Codex 弹出选项对话框提问**：Codex 的提问工具 `request_user_input` 默认只在 Plan 模式下可用。在 `~/.codex/config.toml` 里加上下面几行，普通模式下也能用（没打开时，skill 会在回复里列出编号选项，然后停下来等你回答）：
+  ```toml
+  suppress_unstable_features_warning = true
+
+  [features]
+  default_mode_request_user_input = true
+  ```
+- **用 Sites 托管网页**：在 Codex 里装好 Sites 插件后，skill 会先把拓扑图确认稿发布成一个网页，之后补课堂、补题库、每周更新都在同一个 site 上改。新建的 site 默认只有你自己能看，分享前检查分享范围。
 
 **腾讯 WorkBuddy**：有两种方式。
 - 在界面上传：技能 → 添加技能 → 上传技能，选择 `dist/painless-learning-web-workbuddy.zip`。
