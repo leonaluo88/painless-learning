@@ -1,0 +1,7 @@
+interface:
+  display_name: "无痛学习网页"
+  short_description: "把课件、教材或一个主题做成带知识点拓扑、逐步讲解、逻辑主线和自测的学习网页"
+  default_prompt: "用 painless-learning-web 把这个文件夹里的学习材料做成学习网页。先判断规格，必要时问我。"
+
+policy:
+  allow_implicit_invocation: true
