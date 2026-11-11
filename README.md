@@ -1,5 +1,7 @@
 # 无痛学习网页 · painless-learning
 
+**中文** | [English](README.en.md)
+
 一个 AI Agent Skill：把课件、教材、lecture 转写稿、样卷，甚至只是“我想学 X”，做成**一门课一个**的交互式学习网页。
 
 这个仓库包含三个 skill 包，内容相同，只是按各 agent 的环境做了适配：
@@ -40,8 +42,10 @@ Claude Code、Gemini CLI、GitHub Copilot 等其他支持 [Agent Skills 标准](
 ## 仓库结构
 
 ```
-painless-learning-web/
-├── README.md
+painless-learning/
+├── README.md                            ← 中文说明
+├── README.en.md                         ← English
+├── LICENSE
 ├── claude/painless-learning-web/
 │   ├── SKILL.md
 │   └── scripts/validate_course.py
