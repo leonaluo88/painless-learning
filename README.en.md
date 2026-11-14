@@ -10,7 +10,7 @@ This repository contains three skill packages. They follow the same rules; each 
 |---|---|---|
 | `claude/painless-learning-web/` | Claude (claude.ai web / desktop) | Published as an artifact, a hosted page with a link. Screenshots of the cited slide pages are uploaded with it |
 | `codex/painless-learning-web/` | OpenAI Codex | Published as a hosted site with the Sites plugin when available, and every later change goes to the same site; otherwise written to `_学习网页/index.html` in your course folder. Includes `agents/openai.yaml` for the Codex UI |
-| `workbuddy/painless-learning-web/` | Tencent WorkBuddy | Written to `_学习网页/index.html` in your course folder and opened directly in a browser |
+| `workbuddy/painless-learning-web/` | Tencent WorkBuddy | Built and checked in your course folder, then published as a link with WorkBuddy's site deployment; later updates go to the same site. Includes a visual reference, `references/ui-kit.css` |
 
 Other tools that support the [Agent Skills standard](https://agentskills.io/specification), such as Claude Code, Gemini CLI and GitHub Copilot, can use the Codex or WorkBuddy package.
 
@@ -58,6 +58,9 @@ painless-learning/
 │   └── scripts/validate_course.py
 ├── workbuddy/painless-learning-web/
 │   ├── SKILL.md
+│   ├── references/ui-kit.css            ← visual reference implementation (a reference, not a template)
+│   ├── references/ui-kit.md             ← what must stay consistent and what changes per course
+│   ├── references/rule-changelog.md     ← rule change history
 │   └── scripts/validate_course.py
 └── dist/                                ← ready-made zips for uploading in an app
     ├── painless-learning-web-claude.zip
@@ -65,12 +68,7 @@ painless-learning/
     └── painless-learning-web-workbuddy.zip
 ```
 
-The SKILL.md in the WorkBuddy package starts with an extra section, "零、环境约定" (Environment conventions). It covers the differences from the Claude version:
-
-- The site is written as local files.
-- Slides are linked by relative path to a specific PDF page.
-- The page cannot call an AI, so cheat-sheet entries are tidied up by copying them to the agent.
-- Self-improvement edits the skill file directly.
+The WorkBuddy package has the most constraints, because WorkBuddy works differently from Claude and needs more explicit rules to reach the same result. Its SKILL.md opens with two sections. "零、环境约定" (Environment conventions) covers the differences from the Claude version: publish as a site link and remember where it is, load formulas from a CDN, no AI calls inside the page, and only two timer levels (whole paper and current step). "零之二、硬性交付清单" (Hard delivery checklist) lists the 14 items most often missed; missing one means the job is not done. It also spells out rules found only in this version: mobile layout, a theme colour per course, minimum standards for formulas, and short labels plus a detail panel for the topology graph.
 
 The Codex package is split into a short SKILL.md plus `references/`. SKILL.md holds only the hard rules: the learning goal comes from the user, the topology is drawn at knowledge-point level, a minimum spec and an example for the confirmation draft, how to ask questions, and how to deliver the site. The detailed rules for each step live in `references/`. A single long file tended to get skimmed in Codex, which led to module-level linear routes and no questions asked.
 
@@ -105,8 +103,8 @@ Two recommended extras:
 - Upload it in the app: Skills → Add skill → Upload skill, then choose `dist/painless-learning-web-workbuddy.zip`.
 - Or copy it in by hand, then restart WorkBuddy:
   ```bash
-  mkdir -p ~/.workbuddy/skills
-  cp -r workbuddy/painless-learning-web ~/.workbuddy/skills/
+  mkdir -p ~/.workbuddy-ai/skills
+  cp -r workbuddy/painless-learning-web ~/.workbuddy-ai/skills/
   ```
 
 **Claude Code / other tools:** copy `codex/painless-learning-web` into that tool's skills folder, for example `~/.claude/skills/` or `~/.gemini/skills/`.

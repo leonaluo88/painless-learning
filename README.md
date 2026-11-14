@@ -10,7 +10,7 @@
 |---|---|---|
 | `claude/painless-learning-web/` | Claude（claude.ai 网页版 / 桌面端） | 发布为 artifact（带链接的托管网页），课件页截图随网页上传 |
 | `codex/painless-learning-web/` | OpenAI Codex | 能用 Sites 插件时发布为托管网页，之后一直在同一个 site 上更新；否则写到课程文件夹的 `_学习网页/index.html`。附 `agents/openai.yaml` 界面信息 |
-| `workbuddy/painless-learning-web/` | 腾讯 WorkBuddy | 写到课程文件夹的 `_学习网页/index.html`，浏览器直接打开 |
+| `workbuddy/painless-learning-web/` | 腾讯 WorkBuddy | 先在课程文件夹生成、校验，再用 WorkBuddy 的站点发布功能发布成链接，之后一直更新同一个站点；附视觉参考 `references/ui-kit.css` |
 
 Claude Code、Gemini CLI、GitHub Copilot 等其他支持 [Agent Skills 标准](https://agentskills.io/specification)的工具，可以用 Codex 包或 WorkBuddy 包。
 
@@ -56,6 +56,9 @@ painless-learning/
 │   └── scripts/validate_course.py
 ├── workbuddy/painless-learning-web/
 │   ├── SKILL.md
+│   ├── references/ui-kit.css            ← 视觉参考实现（参考，不是模板）
+│   ├── references/ui-kit.md             ← 视觉说明：哪些必须统一、哪些每门课不同
+│   ├── references/rule-changelog.md     ← 规则迭代记录
 │   └── scripts/validate_course.py
 └── dist/                                ← 打包好的 zip，用于界面上传
     ├── painless-learning-web-claude.zip
@@ -63,7 +66,7 @@ painless-learning/
     └── painless-learning-web-workbuddy.zip
 ```
 
-WorkBuddy 包的 SKILL.md 开头多了一节“零、环境约定”。它说明了和 Claude 版的区别：网页写成本地文件；课件用相对路径链接到 PDF 的某一页；网页里不能调用 AI，Cheat Sheet 的整理改成“复制给 AI”；自我改进时直接修改 skill 文件。
+WorkBuddy 包的约束最多，因为 WorkBuddy 的工作方式和 Claude 不同，要多写一些才能做出同样的效果。SKILL.md 开头有两节：“零、环境约定”写明和 Claude 版的区别（发布成站点链接并记住位置、公式用 CDN、网页里不接 AI、计时只做整卷和本步两级）；“零之二、硬性交付清单”把最容易漏的 14 项列成表，缺一项就算没做完。另外还有手机适配、每门课一个主题色、公式底线、拓扑图短名和详情面板等只在 WorkBuddy 版里写明的规则。
 
 Codex 包拆成了“精简 SKILL.md + references/”：SKILL.md 只写必须做到的事（学习目的只听用户说、知识点级拓扑图、确认稿最低要求和样例、怎么提问、网页交付），细则按环节放在 `references/` 里。这样做是因为单个长文件在 Codex 里容易被略读，出现过只给模块级直线路线、不提问的情况。
 
@@ -98,8 +101,8 @@ cp -r codex/painless-learning-web ~/.agents/skills/
 - 在界面上传：技能 → 添加技能 → 上传技能，选择 `dist/painless-learning-web-workbuddy.zip`。
 - 手动放入：
   ```bash
-  mkdir -p ~/.workbuddy/skills
-  cp -r workbuddy/painless-learning-web ~/.workbuddy/skills/
+  mkdir -p ~/.workbuddy-ai/skills
+  cp -r workbuddy/painless-learning-web ~/.workbuddy-ai/skills/
   ```
   放好后重启 WorkBuddy。
 

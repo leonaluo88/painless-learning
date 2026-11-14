@@ -31,7 +31,7 @@
 ### 4. 用户确认后，更新 skill
 - 能写入 skill 所在的文件夹时（例如 `~/.agents/skills/painless-learning-web/`、`~/.workbuddy/skills/painless-learning-web/`，或用户的 GitHub 仓库），直接修改 SKILL.md 或 references 里对应的文件（通用硬性要求改 SKILL.md，细节改对应的 reference）。
 - 写不进去时，给出可以直接粘贴的修改内容（位置 + 新文本），并提醒用户：其他 agent 里装的副本也要同步。
-- 在文末的“规则迭代记录”里追加一条：日期、触发的问题、适用范围、改了哪里。
+- 在 `references/rule-changelog.md` 末尾追加一条：日期、触发的问题、适用范围、改了哪里。
 - 用新规则重新检查当前网页，确保已经符合。
 
 ### 5. 规则怎么写

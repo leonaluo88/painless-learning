@@ -1,0 +1,444 @@
+/* ==========================================================================
+   学习网页 UI 套件（ui-kit.css）
+   来源：2026-11-14 用户认可的 Claude 版 MAST90104 期末冲刺页，抽出通用部分。
+   用法：可以整块贴进 <style>，也可以只取需要的部分。这是参考实现，不是模板：
+         A 类纪律（字号五级、行宽、等宽数字、断点、焦点态）照做；
+         B 类主题色（--accent / --mark / 模块色）每门课换一个色相，写进 course.json 的 theme，
+         同一门课沿用、不同课不撞色（用户靠颜色认课）；
+         C 类布局骨架与内容块形状按本课需要选，不要每个页面都长成一样。
+   设计意图：像一份印刷考卷/工作台——浅灰底、白卡片、深蓝主色、黄色荧光笔标记，
+   正文 15px/1.6，说明文字一律降一级变灰，数字一律等宽。
+   ========================================================================== */
+
+:root{
+  /* —— 基础色：只有 6 个，不要新增 —— */
+  --paper:#F3F5F8;   /* 页面底色 */
+  --card:#FFFFFF;    /* 卡片底色 */
+  --ink:#17202B;     /* 正文（不用纯黑，纯黑在浅灰底上刺眼） */
+  --muted:#5B6672;   /* 说明、次要信息、表头 */
+  --line:#D6DCE3;    /* 所有分隔线、边框 */
+  /* —— 语义色：只用来表达状态，不用来装饰 —— */
+  --accent:#1F4E8C;  /* 主色：链接、当前选中、定义框边框 */
+  --mark:#FFE16A;    /* 荧光笔：核心/重点标记（唯一允许的"高亮"） */
+  --good:#2E7D4F;    /* 已掌握、正确 */
+  --warn:#B86A00;    /* 考点、需要注意 */
+  --bad:#B23A3A;     /* 陷阱、错误 */
+  --accent-soft:#E8EFF9;
+  /* —— 字体：三类，各有明确分工 —— */
+  --font-body:"IBM Plex Sans","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;  /* 数字、编号、代码 */
+  --font-en:Georgia,"Times New Roman",serif;                                  /* 英文原题 */
+  --r:8px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#11151B; --card:#181E26; --ink:#E5EAF0; --muted:#9AA5B1; --line:#2A333E;
+    --accent:#86B4EE; --mark:#7A6620; --good:#5FC08A; --warn:#E3A048; --bad:#E07070;
+    --accent-soft:#1B2735; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#11151B; --card:#181E26; --ink:#E5EAF0; --muted:#9AA5B1; --line:#2A333E;
+  --accent:#86B4EE; --mark:#7A6620; --good:#5FC08A; --warn:#E3A048; --bad:#E07070;
+  --accent-soft:#1B2735; color-scheme:dark;
+}
+
+/* —— 基础 —— */
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font:15px/1.6 var(--font-body);
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+a{color:var(--accent)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1320px;margin:0 auto;padding:0 18px}
+h2{font-size:20px;margin:0 0 6px;text-wrap:balance}
+h3{font-size:16px;margin:0 0 6px;text-wrap:balance}
+.lede{color:var(--muted);max-width:72ch;margin:0 0 14px}
+.small{font-size:12.5px;color:var(--muted)}
+
+/* —— 顶栏：两行。第一行品牌 + 主板块 + 状态，第二行子页 + 输入框 —— */
+header.topbar{position:sticky;top:0;z-index:6;background:var(--card);border-bottom:1px solid var(--line)}
+header.topbar .row1{display:flex;align-items:center;gap:10px;padding-top:6px;padding-bottom:4px;flex-wrap:wrap}
+header.topbar .row2{display:flex;align-items:center;gap:10px;padding-bottom:6px;flex-wrap:wrap}
+.brand{font-size:15px;letter-spacing:.3px}
+.ptabs{display:flex;gap:2px;overflow-x:auto}
+.ptabs a{padding:6px 12px;border-radius:6px;text-decoration:none;color:var(--muted);font-size:14.5px;white-space:nowrap}
+.ptabs a.on{background:var(--accent);color:var(--card);font-weight:600}
+.ptabs a small{font-size:11px;margin-left:3px}
+.ptabs a.on small{color:var(--card)}
+.stabs{display:flex;gap:2px}
+.stabs a{padding:2px 10px;font-size:13px;text-decoration:none;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap}
+.stabs a.on{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+.stabs:empty{display:none}
+.sp{flex:1}
+.pbar{height:2px;background:var(--line)}
+.pbar i{display:block;height:100%;background:var(--good);width:0}
+
+/* —— 小零件 —— */
+.chip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;
+  padding:1px 9px;font-size:12.5px;white-space:nowrap;background:var(--card)}
+.chip.prof{border-color:var(--accent);color:var(--accent)}
+.chip.count{font-family:var(--font-mono);font-size:13px}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:13px}
+.btn:hover{border-color:var(--accent)}
+.btn.on{background:var(--accent);color:var(--card);border-color:var(--accent)}
+.btn.sm{padding:2px 8px;font-size:12.5px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{border:0;background:var(--card);padding:5px 11px;cursor:pointer;font-size:13px}
+.seg button.on{background:var(--accent);color:var(--card)}
+select,input[type=search],input[type=text],textarea{font:inherit;font-size:13.5px;color:var(--ink);
+  background:var(--card);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--good);width:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.empty{border:1px dashed var(--line);border-radius:8px;padding:26px;text-align:center;color:var(--muted)}
+
+/* —— 徽标：重要度、来源标签 —— */
+.tier{font-size:11.5px;border-radius:4px;padding:1px 7px;display:inline-block;white-space:nowrap;line-height:1.6}
+.tier.t3{background:var(--mark);color:var(--ink)}          /* 核心：荧光笔底 */
+.tier.t2{border:1px solid var(--warn);color:var(--warn)}    /* 重要：描边 */
+.tier.t1{border:1px dashed var(--muted);color:var(--muted)} /* 次要：虚线 */
+.tier.t0{border:1px solid var(--line);color:var(--muted)}
+.lab{font-size:11.5px;border-radius:4px;padding:0 6px;border:1px solid var(--line)}
+.lab.off{border-color:var(--good);color:var(--good)}  /* 官方答案 */
+.lab.tea{border-color:var(--warn);color:var(--warn)}  /* 老师讲解 */
+.tag{font-family:var(--font-en);font-size:.84em;color:var(--accent);letter-spacing:.3px} /* (I)(II) 罗马序号 */
+.srcref{font-size:11.5px;font-weight:400;color:var(--muted);margin-left:6px;font-family:var(--font-mono)}
+
+/* —— 知识点 chip：可点、可显示掌握状态 —— */
+.pchip{font-size:12.5px;border:1px solid var(--line);border-radius:5px;padding:0 6px;cursor:pointer;
+  background:var(--card);white-space:nowrap}
+.pchip.t3{box-shadow:inset 0 -3px 0 var(--mark)}          /* 核心点用底部荧光条，不用换底色 */
+.pchip[data-s="2"],.pchip[data-s="3"]{background:var(--good);border-color:var(--good);color:var(--card)}
+.pchip .nn{font-family:var(--font-mono);font-size:12px;color:var(--muted);min-width:0;margin-right:3px}
+.pchip[data-s="2"] .nn,.pchip[data-s="3"] .nn{color:var(--card)}
+.nn{font-family:var(--font-mono);font-size:12px;color:var(--muted);min-width:2.2em;text-align:right}
+.pl{cursor:pointer;text-decoration:none;color:var(--ink);border-bottom:1px dotted var(--muted)}
+.pl:hover{color:var(--accent)}
+.qchip{font-family:var(--font-mono);font-size:12px;border:1px solid var(--line);border-radius:4px;
+  padding:0 5px;background:var(--paper);cursor:pointer;white-space:nowrap}
+.qchip.ex{border-color:var(--warn)}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}
+.mchip{font-size:12px;border-radius:4px;padding:1px 7px;color:#fff;white-space:nowrap} /* 模块色块，色值由 JS 给 */
+
+/* —— 表格：边框包一层，表头吸顶，数字等宽 —— */
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:6px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:12.5px;position:sticky;top:0;background:var(--card)}
+td.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums;color:var(--muted)}
+tr.out td{opacity:.55}
+.mini{border-collapse:collapse;font-size:13.5px;width:auto;margin:6px 0}
+.mini td,.mini th{border:1px solid var(--line);padding:3px 12px;text-align:center}
+
+/* —— 讲解内容块：一屏里只有这几种，形状各不相同，一眼分得清 —— */
+.blk{margin:12px 0;max-width:78ch}                            /* 78ch 是行宽上限，再宽眼睛会跑丢 */
+.blk>b{display:block;font-size:12.5px;margin-bottom:4px}
+.blk.def{border:1px solid var(--accent);border-radius:6px;padding:10px 13px}
+.blk.def>b{color:var(--accent)}
+/* 补充说明：只降颜色 + 一条左细线，不换字体（楷体在大屏上像旧书，手机上更糊） */
+.blk.plain{background:none;border:0;border-left:2px solid var(--line);border-radius:0;
+  padding:2px 0 2px 12px;margin-top:-4px;color:color-mix(in srgb,var(--ink) 78%,var(--paper))}
+.blk.def+.blk.plain,.blk.ex+.blk.plain{margin-left:14px}
+.blk.ex{border:1px dashed var(--line);border-radius:6px;padding:10px 13px}
+.blk.ex>b{color:var(--muted)}
+.blk.exam{border-left:3px solid var(--warn);padding:8px 12px;background:var(--card)}
+.blk.exam>b{color:var(--warn)}
+.blk.trap{border-left:3px solid var(--bad);padding:8px 12px}
+.blk.trap>b{color:var(--bad)}
+.blk.write{border:1px solid var(--line);border-radius:6px;padding:10px 13px;background:var(--paper)}
+.blk.write .en{font-family:var(--font-en);font-size:14.5px;line-height:1.65}
+.blk.write .zh{font-size:13px;color:var(--muted);margin-top:6px}
+.blk.fyi{font-size:13px;color:var(--muted)}
+.blk.reveal .ans{display:none;margin-top:6px}
+.blk.reveal.open .ans{display:block}
+.blk ul,.blk ol{margin:6px 0 2px;padding-left:1.5em}
+.blk li{margin:4px 0;line-height:1.65}
+.blk ul.tagged{list-style:none;padding-left:0}
+/* 用悬挂缩进而不是 grid：MathJax 会把 $…$ 换成独立元素，
+   放进 grid 会各自占一格，整行被打散成竖排 */
+.blk ul.tagged li{padding-left:3.2em;text-indent:-3.2em}
+.blk ul.tagged li .tag{display:inline-block;width:3.2em;text-indent:0}
+.blk ol.steps{counter-reset:st;list-style:none;padding-left:0}
+.blk ol.steps>li{counter-increment:st;position:relative;padding-left:1.9em}
+.blk ol.steps>li::before{position:absolute;left:0;top:.3em;content:counter(st);font-family:var(--font-mono);
+  font-size:11.5px;color:var(--card);background:var(--accent);border-radius:99px;
+  width:1.45em;height:1.45em;display:inline-flex;align-items:center;justify-content:center}
+pre.rout{font-family:var(--font-mono);font-size:12px;background:var(--paper);border:1px solid var(--line);
+  border-radius:6px;padding:8px 10px;overflow-x:auto;line-height:1.45}
+blockquote{margin:0;border-left:3px solid var(--warn);padding:6px 12px;background:var(--card);border-radius:0 6px 6px 0}
+.mjx-container[display="true"]{margin:.6em 0!important}
+
+/* —— 课堂：左栏 270 + 主区，步骤卡右上角计时胶囊 —— */
+.lgrid{display:grid;grid-template-columns:270px minmax(0,1fr);gap:14px;align-items:start}
+.lside{position:sticky;top:96px;max-height:calc(100vh - 110px);overflow:auto;padding:8px}
+.lside h4{font-size:12px;color:var(--muted);font-weight:600;margin:10px 0 4px;letter-spacing:.3px}
+.lside .ls{display:block;padding:4px 6px;border-radius:5px;text-decoration:none;color:var(--ink);font-size:13.5px;cursor:pointer}
+.lside .ls.on{background:var(--paper);font-weight:600}
+.lside .ls.na{color:var(--muted)}
+.lside .ls small{color:var(--muted);font-weight:400}
+.stepl{list-style:none;margin:2px 0 6px 6px;padding:0 0 0 8px;border-left:2px solid var(--line)}
+.stepl li{font-size:12.5px;padding:2px 4px;cursor:pointer;display:flex;justify-content:space-between;
+  gap:6px;border-radius:4px}
+.stepl li.on{background:var(--paper);font-weight:600}
+.stepl li .ok{color:var(--good)}
+.stepl li .tm{font-family:var(--font-mono);color:var(--muted);font-size:11px}
+.lbar{height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin:4px 0 8px}
+.lbar i{display:block;height:100%;background:var(--accent)}
+details.grp{border-radius:8px;margin:0 0 6px;background:var(--paper)}
+details.grp>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 8px;font-size:13px}
+details.grp>summary::-webkit-details-marker{display:none}
+.stepcard{padding:18px 20px;position:relative}
+.stimer{position:absolute;right:16px;top:14px;font-size:12.5px;color:var(--muted);
+  font-variant-numeric:tabular-nums;background:var(--paper);border-radius:99px;padding:2px 10px}
+.stimer b{font-family:var(--font-mono);color:var(--ink)}
+.stephead{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.stephead .en{font-style:italic}
+.pos{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:12.5px;margin:4px 0 10px}
+.pos span{padding:1px 7px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+.pos span.here{border-color:var(--accent);color:var(--accent);font-weight:600}
+.whyline{font-size:14px;background:var(--paper);border-radius:6px;padding:7px 11px;margin:0 0 12px}
+.stepnav{display:flex;justify-content:space-between;gap:10px;margin-top:18px;
+  border-top:1px solid var(--line);padding-top:12px}
+
+/* —— 题卡：全站只有这一种 —— */
+.qcard{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--card);margin:10px 0}
+.qcard .qh{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:var(--muted);margin-bottom:6px}
+.qcard .qz{font-size:14.5px;margin-bottom:8px}
+.qcard.faded{opacity:.55}
+.qcard.faded:hover{opacity:1}
+.qcard.mastered{border-color:var(--good)}
+.qcard .mk{font-size:12px;color:var(--good);display:inline-flex;gap:4px;align-items:center;cursor:pointer}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{text-align:left;border:1px solid var(--line);background:var(--card);border-radius:6px;
+  padding:7px 10px;cursor:pointer;font-size:14px}
+.opt:hover{border-color:var(--accent)}
+.opt.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 12%,var(--card))}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,var(--card))}
+.fb{margin-top:8px;font-size:13.5px;border-radius:6px;padding:8px 11px;display:none}
+.fb.on{display:block}
+.fb.ok{background:color-mix(in srgb,var(--good) 12%,var(--card));border:1px solid var(--good)}
+.fb.no{background:color-mix(in srgb,var(--bad) 8%,var(--card));border:1px solid var(--bad)}
+.qrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.qrow input{width:140px}
+.orderbox{display:flex;flex-direction:column;gap:5px}
+.oitem{border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer;
+  background:var(--card);text-align:left;font-size:14px}
+.oitem.used{opacity:.4}
+.oans{min-height:30px;border:1px dashed var(--line);border-radius:6px;padding:6px 10px;font-size:13.5px}
+.seglist{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+
+/* —— 真题：整卷计时吸顶 + 每个小问一块 —— */
+.ptimer{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--card);
+  border:1px solid var(--line);border-radius:8px;padding:8px 12px;position:sticky;top:92px;z-index:4;margin-bottom:12px}
+.ptimer .clock{font-family:var(--font-mono);font-size:18px;font-variant-numeric:tabular-nums}
+.pq{margin:18px 0}
+.pq>h3{display:flex;gap:10px;align-items:baseline}
+.stem{font-size:14px;margin:4px 0 8px}
+.stem .zh{color:var(--muted);font-size:13.5px}
+.part{border:1px solid var(--line);border-radius:8px;background:var(--card);padding:12px 14px;margin:10px 0}
+.part .ph{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.part .ph b{color:var(--ink);font-size:14px}
+.part .en{font-family:var(--font-en);font-size:14.5px}
+.part .zh{font-size:13.5px;color:var(--muted);margin:4px 0}
+details>summary{cursor:pointer;font-size:13.5px;color:var(--accent)}
+details .body{padding:6px 2px 2px}
+.fig{max-width:100%;border-radius:6px;background:#fff;margin:6px 0}
+
+/* —— 地图：左图右栏，栏宽 360 固定，图区高度跟视口 —— */
+.mapgrid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px;align-items:start}
+.graphbox{position:relative;height:min(72vh,760px);min-height:420px;background:var(--card);
+  border:1px solid var(--line);border-radius:var(--r);overflow:hidden;touch-action:none;cursor:grab}
+.graphbox.drag{cursor:grabbing}
+.graphbox svg{width:100%;height:100%;display:block;user-select:none}
+.zoom{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:4px}
+.zoom .btn{width:32px;padding:3px 0;text-align:center}
+.hint{position:absolute;left:10px;bottom:8px;font-size:12px;color:var(--muted);
+  background:var(--card);padding:1px 6px;border-radius:4px;opacity:.9}
+.node{cursor:pointer}
+.node rect{stroke-width:1.2}
+.node text{font:10.5px var(--font-body);fill:var(--ink);pointer-events:none}
+.node .no{font-family:var(--font-mono);font-size:9.5px;fill:var(--muted)}
+.node.dim{opacity:.16}
+.node.sel rect{stroke-width:3;stroke:var(--ink)!important}
+.node.anc rect{stroke-width:2}
+.edge{fill:none;stroke:var(--muted);stroke-width:1;opacity:.45}
+.edge.soft{stroke-dasharray:4 3}
+.edge.dim{opacity:.06}
+.edge.hot{stroke:var(--accent);opacity:1;stroke-width:1.8}
+.edge.hotd{stroke:var(--warn);opacity:.9;stroke-width:1.4}
+.panel{position:sticky;top:96px;max-height:calc(100vh - 110px);overflow:auto}
+.panel h3 .n{font-family:var(--font-mono);color:var(--muted);font-weight:400;margin-right:4px}
+.kv{display:grid;grid-template-columns:72px 1fr;gap:4px 8px;font-size:13.5px;margin:8px 0}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0}
+.plist{list-style:none;margin:4px 0 8px;padding:0;display:flex;flex-direction:column;gap:3px}
+.plist li{display:flex;gap:6px;align-items:baseline;font-size:13.5px}
+.why{color:var(--muted);font-size:12.5px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);margin:8px 0 0}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.sw{width:14px;height:10px;border-radius:2px;display:inline-block;border:1.4px solid}
+
+/* —— 学习路径：左列日期 150，右边内容 —— */
+.days{display:flex;flex-direction:column;gap:12px}
+.day{display:grid;grid-template-columns:150px 1fr;gap:14px}
+.day .when b{display:block;font-size:15px}
+.day .when span{font-size:12.5px;color:var(--muted)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.facts .card b{display:block;font-size:13px;color:var(--muted);font-weight:500}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.story{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.story li{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:baseline}
+
+/* —— 弹窗、提示条、撤销条 —— */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;
+  justify-content:center;z-index:50;padding:16px}
+.modal.on{display:flex}
+.modal .box{background:var(--card);border-radius:var(--r);max-width:min(980px,100%);
+  max-height:100%;overflow:auto;padding:10px}
+.modal img{max-width:100%;display:block;border-radius:4px;background:#fff}
+.modal .cap{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  font-size:13px;color:var(--muted);margin-bottom:6px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);
+  color:var(--paper);padding:7px 14px;border-radius:6px;font-size:13.5px;z-index:60;display:none;max-width:90vw}
+.toast.on{display:block}
+.utoast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);
+  color:var(--paper);padding:6px 8px 6px 14px;border-radius:6px;font-size:13.5px;z-index:61;
+  display:none;align-items:center;gap:12px;max-width:92vw}
+.utoast.on{display:flex}
+.utoast button{background:transparent;border:1px solid color-mix(in srgb,var(--paper) 50%,transparent);
+  color:var(--paper);border-radius:5px;padding:2px 10px;font:inherit;cursor:pointer}
+.tipline{display:flex;gap:8px;align-items:center;background:var(--accent-soft);color:var(--ink);
+  border-radius:6px;padding:6px 10px;font-size:13px;margin:0 0 10px}
+.tipline button{margin-left:auto;background:none;border:0;color:var(--muted);cursor:pointer;font:inherit}
+.focusbar{display:none;align-items:center;gap:8px;flex-wrap:wrap;background:var(--card);
+  border:1px solid var(--warn);border-radius:6px;padding:6px 10px;margin-bottom:10px;font-size:13.5px}
+.focusbar.on{display:flex}
+.pending{border:1px dashed var(--line);border-radius:var(--r);padding:28px;text-align:center;color:var(--muted)}
+
+/* —— Cheat Sheet 暂存：瀑布流，条目不可跨列断开 —— */
+.board{columns:300px;column-gap:12px}
+.board .tipline,.board .trash,.board>.empty{column-span:all}
+.cc{break-inside:avoid;margin:0 0 12px;border:1px solid var(--line);border-radius:8px;
+  background:var(--card);padding:10px 12px;position:relative}
+.cc h4{margin:0 0 4px;font-size:14.5px}
+.cc .body{font-size:13.5px;overflow-x:auto}
+.cc .ctx{font-size:11.5px;color:var(--muted);margin-top:6px}
+.cc img{max-width:100%;border-radius:4px;display:block;background:#fff}
+.trash{margin-top:22px;border-top:1px dashed var(--line);padding-top:10px}
+.trash .cc{opacity:.55}
+
+/* ==========================================================================
+   响应式：这一节和上面同等重要。
+   目标不是“能显示”，是“手机上也能一口气读完一段话、一次点中一个按钮”。
+   断点只有两个：900（双栏塌单栏）、700（手机专用放大与重排）。
+   ========================================================================== */
+
+/* 长公式永远不要撑破容器（桌面也会溢出） */
+.mjx-container[display="true"]{max-width:100%;overflow-x:auto;overflow-y:hidden}
+.blk,.part,.qcard{overflow-wrap:anywhere}
+
+/* —— 900：所有双栏塌成单栏，侧栏顺序下沉 —— */
+@media (max-width:900px){
+  .mapgrid{grid-template-columns:1fr}
+  .panel{position:static;max-height:none}
+  .graphbox{height:62vh}
+  .day{grid-template-columns:1fr;gap:4px}
+  .day .when{display:flex;gap:8px;align-items:baseline}
+  .lgrid{grid-template-columns:1fr}
+  .lside{position:static;max-height:none;order:2}
+  .lside .stepl{display:flex;flex-wrap:wrap;gap:4px;border-left:0;padding-left:0;margin-left:0}
+  .lside .stepl li{border:1px solid var(--line);border-radius:99px;padding:2px 8px}
+  .ptimer{top:42px}
+  .board{columns:240px}
+}
+
+/* —— 700：手机。三件事——字号放大、点得中、表格换形态 —— */
+@media (max-width:700px){
+  /* 1. 字号整体上浮一档：12.5px 在手机上是要眯眼的 */
+  body{font-size:16px;line-height:1.65}
+  .small,.lede,.why,.ctx{font-size:13.5px}
+  .nn,.srcref,.qchip,.pchip{font-size:12.5px}
+  .tier,.lab{font-size:12px}
+  .qcard .qz,.opt{font-size:15px}
+  .blk>b,.stephead{font-size:13px}
+  h2{font-size:19px}
+  h3{font-size:17px}
+
+  /* 2. 点得中：可点元素最小 40px 高，间距拉开 */
+  .btn{padding:8px 12px;font-size:14px;min-height:38px}
+  .btn.sm{padding:6px 10px;min-height:34px}
+  .opt{padding:11px 12px;min-height:44px}
+  .pchip{padding:4px 9px;min-height:30px;display:inline-flex;align-items:center}
+  .qchip{padding:3px 7px}
+  .seg button{padding:8px 12px;min-height:38px}
+  .st{padding:2px 8px;min-height:26px}
+  .stepl li{padding:6px 10px}
+  .stepnav .btn{flex:1}                 /* 上一步/下一步各占一半，拇指好按 */
+
+  /* 3. 间距收紧，把屏幕留给内容 */
+  .wrap{padding:0 14px}
+  section.view{padding:12px 0 40px}
+  .card{padding:12px 13px}
+  .stepcard{padding:14px 14px}
+  .blk{margin:14px 0;max-width:none}    /* 手机上不需要限宽 */
+  .blk.def,.blk.ex,.blk.write{padding:9px 11px}
+  .qcard{padding:11px 12px;margin:12px 0}
+  .part{padding:11px 12px}
+
+  /* 4. 顶栏：主板块横向滚动，次要按钮收起来 */
+  header.topbar .row1{padding-top:4px;gap:8px}
+  .ptabs{order:3;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .ptabs::-webkit-scrollbar{display:none}
+  .ptabs a{padding:7px 12px;font-size:15px}
+  .ptabs a.on{border-radius:99px}
+  header.topbar .row2{gap:8px}
+  .stabs a{padding:4px 10px;font-size:14px}
+  .brand{display:none}                   /* 课程代码在手机上不必要，省一行 */
+  .hide-m{display:none!important}        /* 给“深色 / 术语 / 进度码”这类次要按钮用 */
+  .chip{font-size:13px;padding:2px 9px}
+  .stimer{position:static;display:inline-flex;margin-bottom:8px}
+
+  /* 5. 表格：手机横向滚动很难用，改成“每行一张小卡” */
+  .tblwrap{overflow:visible;border:0;background:none}
+  .tblwrap table{display:block}
+  .tblwrap thead{display:none}           /* 列名改到每个单元格前面 */
+  .tblwrap tbody,.tblwrap tr{display:block}
+  .tblwrap tr{border:1px solid var(--line);border-radius:8px;background:var(--card);
+    padding:8px 10px;margin:0 0 8px}
+  .tblwrap td{display:grid;grid-template-columns:5.5em 1fr;gap:6px;border:0;padding:3px 0;font-size:14px}
+  .tblwrap td::before{content:attr(data-label);color:var(--muted);font-size:12.5px}
+  .tblwrap td:first-child{font-weight:600;font-size:15px;grid-template-columns:1fr;margin-bottom:2px}
+  .tblwrap td:first-child::before{display:none}
+  .mini{display:block;overflow-x:auto}   /* 小表格仍横滚，但别撑破 */
+
+  /* 6. 图：手机上手势优先 */
+  .graphbox{height:58vh;min-height:340px;touch-action:pan-y}
+  .zoom{right:6px;top:6px}
+  .zoom .btn{width:40px;min-height:40px;font-size:16px}
+  .hint{display:none}                    /* 手机上这行字挡图 */
+  .panel{padding:12px 13px}
+  .kv{grid-template-columns:5em 1fr}
+
+  /* 7. Cheat Sheet 单列 */
+  .board{columns:1}
+  .cc{margin-bottom:10px}
+}
+
+/* —— 380 以下再降一档（iPhone SE / 老安卓） —— */
+@media (max-width:380px){
+  .wrap{padding:0 11px}
+  .tblwrap td{grid-template-columns:4.8em 1fr}
+  .pchip{font-size:12px}
+}
+
+/* —— 横屏手机：图别占满整屏 —— */
+@media (max-height:520px) and (orientation:landscape){
+  .graphbox{height:76vh}
+  header.topbar .row2{display:none}
+}
+
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
